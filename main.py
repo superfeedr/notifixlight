@@ -13,8 +13,8 @@ from google.appengine.ext import db
 from google.appengine.api import urlfetch
 
 
-SUPERFEEDR_LOGIN = "XXXX"
-SUPERFEEDR_PASSWORD = "YYYY"
+SUPERFEEDR_LOGIN = ""
+SUPERFEEDR_PASSWORD = ""
 
 ##
 # the function that sends subscriptions/unsubscriptions to Superfeedr
@@ -61,40 +61,29 @@ class HubbubSubscriber(webapp.RequestHandler):
   # Called upon notification
   def post(self, feed_sekret):
     subscription = Subscription.get_by_key_name(feed_sekret)
+    if(subscription == None):
+      self.response.set_status(404)
+      self.response.out.write("Sorry, no feed."); 
+      
+    else:
+      body = self.request.body.decode('utf-8')
+      data = feedparser.parse(self.request.body)
+      
+      logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
     
-    body = self.request.body.decode('utf-8')
-    logging.info('Post body is %d characters', len(body))
-
-    data = feedparser.parse(self.request.body)
-    if data.bozo:
-      logging.error('Bozo feed data. %s: %r',
-                     data.bozo_exception.__class__.__name__,
-                     data.bozo_exception)
-      if (hasattr(data.bozo_exception, 'getLineNumber') and
-          hasattr(data.bozo_exception, 'getMessage')):
-        line = data.bozo_exception.getLineNumber()
-        logging.error('Line %d: %s', line, data.bozo_exception.getMessage())
-        segment = self.request.body.split('\n')[line-1]
-        logging.info('Body segment with error: %r', segment.decode('utf-8'))
-      return self.response.set_status(500)
-
-    logging.info('Found %d entries', len(data.entries))
-    for entry in data.entries:
-      entry_id = entry.id
-      content = entry.content[0].value
-      link = entry.get('link', '')
-      title = entry.get('title', '')
-      
-      logging.info('Found entry with title = "%s", id = "%s", '
-                   'link = "%s", content = "%s"',
-                   title, entry_id, link, content)
-      user_address = subscription.jid
-      if xmpp.get_presence(user_address):
-        msg = title + "\n" + content + "\n" + link
-        status_code = xmpp.send_message(user_address, msg)
-      
-    self.response.set_status(200)
-    self.response.out.write("Aight. Saved."); 
+      for entry in data.entries:
+        link = entry.get('link', '')
+        title = entry.get('title', '')
+        logging.info('Found entry with title = "%s", '
+                   'link = "%s"',
+                   title, link)
+        user_address = subscription.jid
+        if xmpp.get_presence(user_address):
+          msg = title + "\n" + link
+          status_code = xmpp.send_message(user_address, msg)
+          
+      self.response.set_status(200)
+      self.response.out.write("Aight. Saved."); 
   
   def get(self, feed_sekret):
     self.response.out.write(self.request.get('hub.challenge'))
@@ -123,11 +112,8 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     subscriber = message.sender.rpartition("/")[0]
     subscription = Subscription.get_by_key_name(hashlib.sha224(message.arg + subscriber).hexdigest())
     result = superfeedr("unsubscribe", subscription)
-    if result.status_code == 204:
-      subscription.delete() # saves the subscription
-      message.reply("Well done! You're not subscribed anymore to " + message.arg)
-    else:
-      message.reply("Sorry :/, couldn't unsusbcribe from " + message.arg)
+    subscription.delete() # saves the subscription
+    message.reply("Well done! You're not subscribed anymore to " + message.arg)
 
   ##
   # Asking for help
