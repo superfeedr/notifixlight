@@ -116,6 +116,21 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     message.reply("Well done! You're not subscribed anymore to " + message.arg)
 
   ##
+  # List subscriptions
+  def ls_command(self, message=None):
+    message = xmpp.Message(self.request.POST)
+    subscriber = message.sender.rpartition("/")[0]
+    query = Subscription.all().filter("jid =",subscriber).order("-created_at")
+    subscriptions = query.fetch(10)
+    if not subscriptions:
+      message.reply("Seems you subscribed nothing yet. Type\n  /subscribe http://twitter.com/statuses/user_timeline/USERNAME.rss\nto play around.")
+    else:
+      message.reply("Your recent subscriptions:\n")
+      feed_list = [s.feed for s in subscriptions]
+      message.reply(feed_list.join("\n"))
+    message.reply(message.body)
+
+  ##
   # Asking for help
   def hello_command(self, message=None):
     message = xmpp.Message(self.request.POST)
@@ -126,7 +141,11 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   # Asking for help
   def help_command(self, message=None):
     message = xmpp.Message(self.request.POST)
-    message.reply("That's easy, just type /subscribe <url> or /unsubscribe <url>")
+    message.reply("It's not even alpha ready, but you could play with following commands:\n\n")
+    message.reply("/hello\n  say hello to 2010\n\n")
+    message.reply("/subscribe <url>\n/unsubscribe <url>\n  subscribe or unsubscribe to a feed\n\n")
+    message.reply("/ls\n  list recent 10 subscriptions\n\n")
+    message.reply("/help\n  print these commands info\n\n")
     message.reply(message.body)
   
   ##
