@@ -123,7 +123,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     query = Subscription.all().filter("jid =",subscriber).order("-created_at")
     subscriptions = query.fetch(10)
     if not subscriptions:
-      message.reply("Seems you subscribed nothing yet. Type\n  /subscribe http://twitter.com/statuses/user_timeline/USERNAME.rss\nto play around.")
+      message.reply("Seems you subscribed nothing yet. Type\n  /subscribe http://superfeedr.com/dummy.xml\nto play around.")
     else:
       message.reply("Your recent subscriptions:\n")
       feed_list = [s.feed for s in subscriptions]
