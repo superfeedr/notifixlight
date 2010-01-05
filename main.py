@@ -38,8 +38,8 @@ def superfeedr(mode, subscription):
 ##
 # The subscription model that matches a feed and a jid.
 class Subscription(db.Model):
-  feed = db.TextProperty(required=True)
-  jid = db.TextProperty(required=True)
+  feed = db.LinkProperty(required=True)
+  jid = db.StringProperty(required=True)
   created_at = db.DateTimeProperty(required=True, auto_now_add=True)
 
 ##
