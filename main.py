@@ -127,7 +127,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     else:
       message.reply("Your recent subscriptions:\n")
       feed_list = [s.feed for s in subscriptions]
-      message.reply(feed_list.join("\n"))
+      message.reply("\n".join(feed_list))
     message.reply(message.body)
 
   ##
