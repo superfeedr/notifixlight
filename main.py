@@ -130,7 +130,6 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
       message.reply("Your recent subscriptions:\n")
       feed_list = [s.feed for s in subscriptions]
       message.reply("\n".join(feed_list))
-    message.reply(message.body)
 
   ##
   # Asking for help
@@ -148,7 +147,6 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     message.reply("/subscribe <url>\n/unsubscribe <url>\n  subscribe or unsubscribe to a feed\n\n")
     message.reply("/ls\n  list recent 10 subscriptions\n\n")
     message.reply("/help\n  print these commands info\n\n")
-    message.reply(message.body)
   
   ##
   # All other commants
