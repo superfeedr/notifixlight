@@ -135,7 +135,9 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   # Asking for help
   def hello_command(self, message=None):
     message = xmpp.Message(self.request.POST)
-    message.reply("Oh, Hai! This is a light version of http://notifixio.us : subscribe to your favorite feeds and get their updates via IM. For more infon type /help.")
+    message.reply("Oh, Hai! Notifixlite is a small app to help you subscribe to your favorite feeds and get their updates via IM. It's powered by Superfeedr (http://superfeedr.com) and its magic powers!. ")
+    message.reply("Make it better : http://github.com/superfeedr/notifixlight.")
+    message.reply("For more infon type /help.")
     message.reply(message.body)
   
   ##
@@ -143,7 +145,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   def help_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     message.reply("It's not even alpha ready, but you could play with following commands:\n\n")
-    message.reply("/hello\n  say hello to 2010\n\n")
+    message.reply("/hello\n a small about\n\n")
     message.reply("/subscribe <url>\n/unsubscribe <url>\n  subscribe or unsubscribe to a feed\n\n")
     message.reply("/ls\n  list recent 10 subscriptions\n\n")
     message.reply("/help\n  print these commands info\n\n")
