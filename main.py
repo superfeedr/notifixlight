@@ -31,7 +31,10 @@ def superfeedr(mode, subscription):
   result = urlfetch.fetch(url="http://superfeedr.com/hubbub",
                   payload=form_data,
                   method=urlfetch.POST,
-                  headers={"Authorization": "Basic "+ base64string, 'Content-Type': 'application/x-www-form-urlencoded'})
+                  headers={"Authorization": "Basic "+ base64string, 'Content-Type': 'application/x-www-form-urlencoded'},
+                  deadline=10)
+  logging.info('Result of %s to %s => %s (%d)',mode, subscription.feed, result.content, result.status_code )
+  
   return result
 
 
@@ -78,9 +81,8 @@ class HubbubSubscriber(webapp.RequestHandler):
                    'link = "%s"',
                    title, link)
         user_address = subscription.jid
-        if xmpp.get_presence(user_address):
-          msg = title + "\n" + link
-          status_code = xmpp.send_message(user_address, msg)
+        msg = title + "\n" + link
+        status_code = xmpp.send_message(user_address, msg)
           
       self.response.set_status(200)
       self.response.out.write("Aight. Saved."); 
