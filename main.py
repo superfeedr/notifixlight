@@ -137,8 +137,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     message = xmpp.Message(self.request.POST)
     message.reply("Oh, Hai! Notifixlite is a small app to help you subscribe to your favorite feeds and get their updates via IM. It's powered by Superfeedr (http://superfeedr.com) and its magic powers!. ")
     message.reply("Make it better : http://github.com/superfeedr/notifixlight.")
-    message.reply("For more infon type /help.")
-    message.reply(message.body)
+    message.reply("For more info, type /help.")
   
   ##
   # Asking for help
@@ -155,7 +154,6 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   def unhandled_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     message.reply("Please, type /help for help.")
-    message.reply(message.body)
   
   ##
   # Sent for any message.
