@@ -31,7 +31,10 @@ def superfeedr(mode, subscription):
   result = urlfetch.fetch(url="http://superfeedr.com/hubbub",
                   payload=form_data,
                   method=urlfetch.POST,
-                  headers={"Authorization": "Basic "+ base64string, 'Content-Type': 'application/x-www-form-urlencoded'})
+                  headers={"Authorization": "Basic "+ base64string, 'Content-Type': 'application/x-www-form-urlencoded'},
+                  deadline=10)
+  logging.info('Result of %s to %s => %s (%d)',mode, subscription.feed, result.content, result.status_code )
+  
   return result
 
 
@@ -78,9 +81,8 @@ class HubbubSubscriber(webapp.RequestHandler):
                    'link = "%s"',
                    title, link)
         user_address = subscription.jid
-        if xmpp.get_presence(user_address):
-          msg = title + "\n" + link
-          status_code = xmpp.send_message(user_address, msg)
+        msg = title + "\n" + link
+        status_code = xmpp.send_message(user_address, msg)
           
       self.response.set_status(200)
       self.response.out.write("Aight. Saved."); 
@@ -128,32 +130,30 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
       message.reply("Your recent subscriptions:\n")
       feed_list = [s.feed for s in subscriptions]
       message.reply("\n".join(feed_list))
-    message.reply(message.body)
 
   ##
   # Asking for help
   def hello_command(self, message=None):
     message = xmpp.Message(self.request.POST)
-    message.reply("Oh, Hai! This is a light version of http://notifixio.us : subscribe to your favorite feeds and get their updates via IM. For more infon type /help.")
-    message.reply(message.body)
+    message.reply("Oh, Hai! Notifixlite is a small app to help you subscribe to your favorite feeds and get their updates via IM. It's powered by Superfeedr (http://superfeedr.com) and its magic powers!. ")
+    message.reply("Make it better : http://github.com/superfeedr/notifixlight.")
+    message.reply("For more info, type /help.")
   
   ##
   # Asking for help
   def help_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     message.reply("It's not even alpha ready, but you could play with following commands:\n\n")
-    message.reply("/hello\n  say hello to 2010\n\n")
+    message.reply("/hello\n a small about\n\n")
     message.reply("/subscribe <url>\n/unsubscribe <url>\n  subscribe or unsubscribe to a feed\n\n")
     message.reply("/ls\n  list recent 10 subscriptions\n\n")
     message.reply("/help\n  print these commands info\n\n")
-    message.reply(message.body)
   
   ##
   # All other commants
   def unhandled_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     message.reply("Please, type /help for help.")
-    message.reply(message.body)
   
   ##
   # Sent for any message.
