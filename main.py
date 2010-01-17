@@ -121,20 +121,22 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   # List subscriptions by page
   # 10/page
   # page default to 1
-  def ls_command(self, page_index=1, message=None):
+  def ls_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     subscriber = message.sender.rpartition("/")[0]
     query = Subscription.all().filter("jid =",subscriber).order("-created_at")
     count = query.count()
+    page_index = int(message.arg or 1)
     if count%10 == 0:
       pages_count = count/10
     else:
       pages_count = count/10 + 1
+    
     page_index = min(page_index, pages_count)
     offset = (page_index - 1) * 10 
     subscriptions = query.fetch(10, offset)
     if not subscriptions:
-      message.reply("Seems you subscribed nothing yet. Type\n  /subscribe http://superfeedr.com/dummy.xml\nto play around.")
+      message.reply("Seems you subscribed nothing yet. Type\n  /subscribe http://twitter.com/statuses/user_timeline/43417156.rss\nto play around.")
     else:
       message.reply("Your have %d subscriptions in total: page %d/%d \n" % (count,page_index,pages_count))
       feed_list = [s.feed for s in subscriptions]
