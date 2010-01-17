@@ -152,12 +152,13 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   # Asking for help
   def help_command(self, message=None):
     message = xmpp.Message(self.request.POST)
-    help_msg = "It's not even alpha ready, but you could play with following commands:\n"
-          +"/hello\n about me\n"
-	  +"/subscribe <url>\n/unsubscribe <url>\n  subscribe or unsubscribe to a feed\n"
-	  +"/ls <page_index>\n  list subscriptions history\n"
-	  +"/help\n  print help info\n"
+    help_msg = "It's not even alpha ready, but you could play with following commands:\n" \
+               "/hello\n about me\n" \
+	       "/subscribe <url>\n/unsubscribe <url>\n  subscribe or unsubscribe to a feed\n" \
+	       "/ls <page_index>\n  list subscriptions, default to page 1\n" \
+	       "/help\n  print help info\n"
     message.reply(help_msg)
+    message.reply(message.body)
   
   ##
   # All other commants
