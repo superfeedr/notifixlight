@@ -70,10 +70,13 @@ class HubbubSubscriber(webapp.RequestHandler):
       
     else:
       body = self.request.body.decode('utf-8')
+      
       data = feedparser.parse(self.request.body)
       
       logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
-    
+      
+      feed_title = data.feed.title 
+      
       for entry in data.entries:
         link = entry.get('link', '')
         title = entry.get('title', '')
@@ -81,7 +84,7 @@ class HubbubSubscriber(webapp.RequestHandler):
                    'link = "%s"',
                    title, link)
         user_address = subscription.jid
-        msg = title + "\n" + link
+        msg = "'" + feed_title + "' : " + title + "\n" + link
         status_code = xmpp.send_message(user_address, msg)
           
       self.response.set_status(200)
@@ -105,6 +108,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
       subscription.put() # saves the subscription
       message.reply("Well done! You're subscribed to " + message.arg)
     else:
+      logging.error('Could not subscribe to %s - Status %s - Error %s', message.arg, result.status_code, result.content)
       message.reply("Sorry, couldn't susbcribe to " + message.arg)
     
   ##
@@ -114,30 +118,30 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     subscriber = message.sender.rpartition("/")[0]
     subscription = Subscription.get_by_key_name(hashlib.sha224(message.arg + subscriber).hexdigest())
     result = superfeedr("unsubscribe", subscription)
-    subscription.delete() # saves the subscription
+    subscription.delete() # deletes the subscription
     message.reply("Well done! You're not subscribed anymore to " + message.arg)
 
   ##
   # List subscriptions by page
-  # 10/page
+  # 100/page
   # page default to 1
   def ls_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     subscriber = message.sender.rpartition("/")[0]
-    query = Subscription.all().filter("jid =",subscriber).order("-created_at")
+    query = Subscription.all().filter("jid =",subscriber).order("feed")
     count = query.count()
     if count == 0:
       message.reply("Seems you subscribed nothing yet. Type\n  /subscribe http://twitter.com/statuses/user_timeline/43417156.rss\nto play around.")
     else:
       page_index = int(message.arg or 1)
-      if count%10 == 0:
-        pages_count = count/10
+      if count%100 == 0:
+        pages_count = count/100
       else:
-        pages_count = count/10 + 1
+        pages_count = count/100 + 1
     
       page_index = min(page_index, pages_count)
-      offset = (page_index - 1) * 10 
-      subscriptions = query.fetch(10, offset)
+      offset = (page_index - 1) * 100
+      subscriptions = query.fetch(100, offset)
       message.reply("Your have %d subscriptions in total: page %d/%d \n" % (count,page_index,pages_count))
       feed_list = [s.feed for s in subscriptions]
       message.reply("\n".join(feed_list))
