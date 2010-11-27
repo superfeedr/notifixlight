@@ -70,13 +70,9 @@ class HubbubSubscriber(webapp.RequestHandler):
       
     else:
       body = self.request.body.decode('utf-8')
-      
       data = feedparser.parse(self.request.body)
-      
       logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
-      
       feed_title = data.feed.title 
-      
       for entry in data.entries:
         link = entry.get('link', '')
         title = entry.get('title', '')
@@ -91,8 +87,16 @@ class HubbubSubscriber(webapp.RequestHandler):
       self.response.out.write("Aight. Saved."); 
   
   def get(self, feed_sekret):
-    self.response.out.write(self.request.get('hub.challenge'))
-    self.response.set_status(200)
+    subscription = Subscription.get_by_key_name(feed_sekret)
+    if(subscription == None):
+      self.response.set_status(404)
+      self.response.out.write("Sorry, no feed."); 
+    else:
+      # Let's confirm to the subscriber that he'll get notifications for this feed.
+      user_address = subscription.jid
+      xmpp.send_message(user_address, "Well done! You're subscribed to " + subscription.feed)
+      self.response.out.write(self.request.get('hub.challenge'))
+      self.response.set_status(200)
   
 ##
 # The XMPP App interface
@@ -103,23 +107,31 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     message = xmpp.Message(self.request.POST)
     subscriber = message.sender.rpartition("/")[0]
     subscription = Subscription(key_name=hashlib.sha224(message.arg + subscriber).hexdigest(), feed=message.arg, jid=subscriber)
+    subscription.put() # saves the subscription
     result = superfeedr("subscribe", subscription)
     if result.status_code == 204:
-      subscription.put() # saves the subscription
-      message.reply("Well done! You're subscribed to " + message.arg)
+      #message.reply("Ok, you should have received a confirmation!")
+      logging.info("Subscription success! %s", message.arg)
     else:
-      logging.error('Could not subscribe to %s - Status %s - Error %s', message.arg, result.status_code, result.content)
-      message.reply("Sorry, couldn't susbcribe to " + message.arg)
+      subscription.delete() # deletes the subscription, as it couldn't be saved.
+      message.reply('Could not subscribe to %s, looks like AppEngine got a small glitch. Please try again!', message.arg)
+      logging.error("Sorry, couldn't subscribe ( Status %s - Error %s) to %s",  message.arg, result.status_code, result.content)
     
   ##
   # Asking to unsubscribe to a feed
   def unsubscribe_command(self, message=None):
     message = xmpp.Message(self.request.POST)
     subscriber = message.sender.rpartition("/")[0]
-    subscription = Subscription.get_by_key_name(hashlib.sha224(message.arg + subscriber).hexdigest())
-    result = superfeedr("unsubscribe", subscription)
-    subscription.delete() # deletes the subscription
-    message.reply("Well done! You're not subscribed anymore to " + message.arg)
+    if message.arg == "all":
+      query = Subscription.all().filter("jid =",subscriber).order("feed")
+      subscriptions = query.fetch(query.count() + 1)
+      db.delete(subscriptions)
+      message.reply("Well done! We deleted all your subscriptions!")
+    else :
+      subscription = Subscription.get_by_key_name(hashlib.sha224(message.arg + subscriber).hexdigest())
+      result = superfeedr("unsubscribe", subscription)
+      subscription.delete() # deletes the subscription
+      message.reply("Well done! You're not subscribed anymore to " + message.arg)
 
   ##
   # List subscriptions by page
@@ -160,7 +172,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     message = xmpp.Message(self.request.POST)
     help_msg = "It's not even alpha ready, but you could play with following commands:\n\n" \
                "/hello -> about me\n\n" \
-	       "/subscribe <url>\n/unsubscribe <url> -> subscribe or unsubscribe to a feed\n\n" \
+	       "/subscribe <url>\n/unsubscribe <url|'all'> -> subscribe or unsubscribe to a feed\n\n" \
 	       "/ls <page_index> ->  list subscriptions, default to page 1\n\n" \
 	       "/help ->  get help message\n"
     message.reply(help_msg)
