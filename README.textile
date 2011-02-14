@@ -13,3 +13,4 @@ h3. TODO
 * Google Reader import
 * Web interface to consult history
 * Add a <code>/track<code> command that directly uses Superfeedr's track feeds.
+* Allow to get started from the web app, rather than from an XMPP client.
