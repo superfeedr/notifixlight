@@ -6,7 +6,7 @@ h3. What is it?
 
 h3. Usage 
 
-Just add "notifixlite@appspot.com":xmpp:notifixlite@appspot.com to your contact on gtalk (using any "XMPP client":http://xmpp.org/xmpp-software/clients/). and get started by saying <code>/help></code>.
+Just add "notifixlite@appspot.com":xmpp:notifixlite@appspot.com to your contact on gtalk (using any "XMPP client":http://xmpp.org/xmpp-software/clients/). and get started by saying <code>/help</code>.
 
 h3. TODO
 
