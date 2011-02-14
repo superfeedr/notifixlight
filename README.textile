@@ -1,0 +1,15 @@
+h2. Notifixite
+
+h3. What is it?
+
+Notifixite is a simple RSS to IM bot.
+
+h3. Usage 
+
+Just add <code>notifixlite@appspot.com</code> to your contact on gtalk (using any XMPP client). and get started by saying <code>/help></code>.
+
+h3. TODO
+
+* Google Reader import
+* Web interface to consult history
+* Add a <code>/track<code> command that directly uses Superfeedr's track feeds.
