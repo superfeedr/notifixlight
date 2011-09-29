@@ -1,8 +1,8 @@
-h2. Notifixite
+h2. notifixlite
 
 h3. What is it?
 
-"Notifixite":http://notifixlite.appspot.com/ is a simple RSS to IM (Jabber, XMPP, Gtalk) bot.
+"notifixlite":http://notifixlite.appspot.com/ is a simple RSS to IM (Jabber, XMPP, Gtalk) bot.
 
 h3. Usage 
 
@@ -10,7 +10,7 @@ Just add "notifixlite@appspot.com":xmpp:notifixlite@appspot.com to your contact 
 
 h3. Run your own
 
-We graciously run an instance that anyone can use at "Notifixite":http://notifixlite.appspot.com/, and it sometimes runs out of credits. You can easily avoid this by running this under your very own Google App Account. To do so :
+We graciously run an instance that anyone can use at "notifixlite":http://notifixlite.appspot.com/, and it sometimes runs out of credits. You can easily avoid this by running this under your very own Google App Account. To do so :
 
 # Signup or log in to "Google App Engine":https://appengine.google.com/
 # Create a new application, name it in a non-guessable way if you want to be the only one using it :)
