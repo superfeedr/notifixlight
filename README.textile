@@ -14,10 +14,10 @@ We graciously run an instance that anyone can use at "Notifixite":http://notifix
 
 # Signup or log in to "Google App Engine":https://appengine.google.com/
 # Create a new application, name it in a non-guessable way if you want to be the only one using it :)
-# Checkout the code : `git clone git://github.com/superfeedr/notifixlight.git`
-# Update your application name's in app.yaml, line 1 (replace `notifixlite`) with whatever you chose at step 2.
+# Checkout the code : <code>git clone git://github.com/superfeedr/notifixlight.git</code>
+# Update your application name's in app.yaml, line 1 (replace <code>notifixlite</code>) with whatever you chose at step 2.
 # Open a superfeedr "subscriber account":http://superfeedr.com/subscriber.
-# Update `main.py` and add your superfeedr credentials at line 16 and 17.
+# Update <code>main.py</code> and add your superfeedr credentials at line 16 and 17.
 # "Deploy your instance":http://code.google.com/appengine/docs/python/gettingstarted/uploading.html of Notifixlite 
 # Enjoy!
 
