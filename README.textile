@@ -14,3 +14,5 @@ h3. TODO
 * Web interface to consult history
 * Add a <code>/track</code> command that directly uses Superfeedr's "track feeds":http://superfeedr.com/documentation#track.
 * Allow to get started from the web app, rather than from an XMPP client.
+* Integrate with Instapaper : add <code>/later</code> for the last notification
+* Allow for <code>/last</code> to get the last X stories.
