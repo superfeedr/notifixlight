@@ -2,14 +2,28 @@ h2. Notifixite
 
 h3. What is it?
 
-"Notifixite":http://notifixlite.appspot.com/ is a simple RSS to IM bot.
+"Notifixite":http://notifixlite.appspot.com/ is a simple RSS to IM (Jabber, XMPP, Gtalk) bot.
 
 h3. Usage 
 
 Just add "notifixlite@appspot.com":xmpp:notifixlite@appspot.com to your contact on gtalk (using any "XMPP client":http://xmpp.org/xmpp-software/clients/). and get started by saying <code>/help</code>.
 
+h3. Run your own
+
+We graciously run an instance that anyone can use at "Notifixite":http://notifixlite.appspot.com/, and it sometimes runs out of credits. You can easily avoid this by running this under your very own Google App Account. To do so :
+
+# Signup or log in to "Google App Engine":https://appengine.google.com/
+# Create a new application, name it in a non-guessable way if you want to be the only one using it :)
+# Checkout the code : `git clone git://github.com/superfeedr/notifixlight.git`
+# Update your application name's in app.yaml, line 1 (replace `notifixlite`) with whatever you chose at step 2.
+# Open a superfeedr "subscriber account":http://superfeedr.com/subscriber.
+# Update `main.py` and add your superfeedr credentials at line 16 and 17.
+# "Deploy your instance":http://code.google.com/appengine/docs/python/gettingstarted/uploading.html of Notifixlite 
+# Enjoy!
+
 h3. TODO
 
+* Allow for "private" instances... limited with a password
 * Google Reader import
 * Web interface to consult history
 * Add a <code>/track</code> command that directly uses Superfeedr's "track feeds":http://superfeedr.com/documentation#track.
