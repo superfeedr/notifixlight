@@ -33,7 +33,7 @@ def superfeedr(mode, subscription):
                   method=urlfetch.POST,
                   headers={"Authorization": "Basic "+ base64string, 'Content-Type': 'application/x-www-form-urlencoded'},
                   deadline=10)
-  logging.info('Result of %s to %s => %s (%d)',mode, subscription.feed, result.content, result.status_code )
+  # logging.info('Result of %s to %s => %s (%d)',mode, subscription.feed, result.content, result.status_code )
   
   return result
 
@@ -71,14 +71,14 @@ class HubbubSubscriber(webapp.RequestHandler):
     else:
       body = self.request.body.decode('utf-8')
       data = feedparser.parse(self.request.body)
-      logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
+      # logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
       feed_title = data.feed.title 
       for entry in data.entries:
         link = entry.get('link', '')
         title = entry.get('title', '')
-        logging.info('Found entry with title = "%s", '
-                   'link = "%s"',
-                   title, link)
+        # logging.info('Found entry with title = "%s", '
+        #            'link = "%s"',
+        #            title, link)
         user_address = subscription.jid
         msg = "'" + feed_title + "' : " + title + "\n" + link
         status_code = xmpp.send_message(user_address, msg)
@@ -117,13 +117,13 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     subscription.put() # saves the subscription
     result = superfeedr("subscribe", subscription)
     if result.status_code == 204:
-      logging.info("Subscription success! %s", message.arg)
+      # logging.info("Subscription success! %s", message.arg)
       message.reply("Successfully subscribed to " + message.arg + "!")
     elif result.status_code == 202:
       message.reply("Subscribing to " + message.arg + ", you should get a confirmation soon.")
     else:
       message.reply("Could not subscribe to " + message.arg + ", looks like AppEngine got a small glitch. Please try again!")
-      logging.error("Sorry, couldn't subscribe ( Status %s - Error %s) to %s",  message.arg, result.status_code, result.content)
+      # logging.error("Sorry, couldn't subscribe ( Status %s - Error %s) to %s",  message.arg, result.status_code, result.content)
 
   ##
   # Asking to unsubscribe to a feed
