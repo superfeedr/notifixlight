@@ -123,7 +123,7 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
       message.reply("Subscribing to " + message.arg + ", you should get a confirmation soon.")
     else:
       message.reply("Could not subscribe to " + message.arg + ", looks like AppEngine got a small glitch. Please try again!")
-      # logging.error("Sorry, couldn't subscribe ( Status %s - Error %s) to %s",  message.arg, result.status_code, result.content)
+      logging.error("Sorry, couldn't subscribe ( Status %s - Error %s) to %s",  message.arg, result.status_code, result.content)
 
   ##
   # Asking to unsubscribe to a feed
