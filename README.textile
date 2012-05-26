@@ -17,9 +17,11 @@ We graciously run an instance that anyone can use at "notifixlite":http://notifi
 # Checkout the code : <code>git clone git://github.com/superfeedr/notifixlight.git</code>
 # Update your application name's in app.yaml, line 1 (replace <code>notifixlite</code>) with whatever you chose at step 2.
 # Open a superfeedr "subscriber account":http://superfeedr.com/subscriber.
-# Update <code>main.py</code> and add your superfeedr credentials at line 16 and 17.
+# Update <code>main.py</code> and add your superfeedr credentials at line 16 and 17; and change the call back on line 24 with your application's URL."
 # "Deploy your instance":http://code.google.com/appengine/docs/python/gettingstarted/uploading.html of Notifixlite 
 # Enjoy!
+
+ps. Earn extra points, modify template/index.html so the instructions match your application's name.
 
 h3. TODO
 
