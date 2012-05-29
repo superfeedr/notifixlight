@@ -11,17 +11,19 @@ from google.appengine.ext.webapp import xmpp_handlers
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from google.appengine.api import urlfetch
-
+from google.appengine.runtime import apiproxy_errors
+from google.appengine.api.app_identity import get_application_id
 
 SUPERFEEDR_LOGIN = ""
 SUPERFEEDR_PASSWORD = ""
+appname = get_application_id()
 
 ##
 # the function that sends subscriptions/unsubscriptions to Superfeedr
 def superfeedr(mode, subscription):
   post_data = {
       'hub.mode' : mode,
-      'hub.callback' : "http://notifixlite.appspot.com/hubbub/" + subscription.key().name(),
+      'hub.callback' : "http://" + appname + ".appspot.com/hubbub/" + subscription.key().name(),
       'hub.topic' : subscription.feed, 
       'hub.verify' : 'async',
       'hub.verify_token' : '',
@@ -49,7 +51,7 @@ class Subscription(db.Model):
 # The web app interface
 class MainPage(webapp.RequestHandler):
   
-  def Render(self, template_file, template_values = {}):
+  def Render(self, template_file, template_values = {'appname': appname}):
      path = os.path.join(os.path.dirname(__file__), 'templates', template_file)
      self.response.out.write(template.render(path, template_values))
   
@@ -63,11 +65,20 @@ class HubbubSubscriber(webapp.RequestHandler):
   ##
   # Called upon notification
   def post(self, feed_sekret):
-    subscription = Subscription.get_by_key_name(feed_sekret)
+    subscription = None
+    try: subscription = Subscription.get_by_key_name(feed_sekret)
+    except apiproxy_errors.OverQuotaError, error_message: 
+      logging.error(error_message)
+      pass
     if(subscription == None):
-      self.response.set_status(404)
-      self.response.out.write("Sorry, no feed."); 
-      
+      if self.request.get("hub.mode") == "unsubscribe" :
+        # Let superfeedr unsusbscribe this.
+        # Even though we have no record of it.
+        self.response.set_status(200)
+        self.response.out.write(self.request.get('hub.challenge'))
+      else:
+        self.response.set_status(404)
+        self.response.out.write("Sorry, no feed."); 
     else:
       body = self.request.body.decode('utf-8')
       data = feedparser.parse(self.request.body)
@@ -82,15 +93,24 @@ class HubbubSubscriber(webapp.RequestHandler):
         user_address = subscription.jid
         msg = "'" + feed_title + "' : " + title + "\n" + link
         status_code = xmpp.send_message(user_address, msg)
-          
       self.response.set_status(200)
-      self.response.out.write("Aight. Saved."); 
-  
+      self.response.out.write("Alright. Saved."); 
+
   def get(self, feed_sekret):
-    subscription = Subscription.get_by_key_name(feed_sekret)
+    subscription = None
+    try: subscription = Subscription.get_by_key_name(feed_sekret)
+    except apiproxy_errors.OverQuotaError, error_message: 
+      logging.error(error_message)
+      pass
     if(subscription == None):
-      self.response.set_status(404)
-      self.response.out.write("Sorry, no feed."); 
+      if self.request.get("hub.mode") == "unsubscribe" :
+        # Let superfeedr unsusbscribe this.
+        # Even though we have no record of it.
+        self.response.set_status(200)
+        self.response.out.write(self.request.get('hub.challenge'))
+      else:
+        self.response.set_status(404)
+        self.response.out.write("Sorry, no feed."); 
     else:
       # Let's confirm to the subscriber that he'll get notifications for this feed.
       user_address = subscription.jid
@@ -132,7 +152,9 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     subscriber = message.sender.rpartition("/")[0]
     if message.arg == "all":
       query = Subscription.all().filter("jid =",subscriber).order("feed")
-      subscriptions = query.fetch(query.count() + 1)
+      subscriptions =  query.fetch(query.count() + 1)
+      for subscription in subscriptions:
+        subscription.delete()
       db.delete(subscriptions)
       message.reply("Well done! We deleted all your subscriptions!")
     else :
@@ -173,7 +195,8 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
   # Asking for help
   def hello_command(self, message=None):
     message = xmpp.Message(self.request.POST)
-    message.reply("Oh, Hai! Notifixlite is a small app to help you subscribe to your favorite feeds and get their updates via IM. It's powered by Superfeedr (http://superfeedr.com) and its magic powers!. ")
+    message.reply("Oh, Hai! " + appname
+                  + " is a small app to help you subscribe to your favorite feeds and get their updates via IM. It's powered by Superfeedr (http://superfeedr.com) and its magic powers!. ")
     message.reply("Make it better : http://github.com/superfeedr/notifixlight.")
     message.reply("For more info, type /help.")
   
