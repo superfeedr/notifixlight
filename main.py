@@ -13,6 +13,10 @@ from google.appengine.ext import db
 from google.appengine.api import urlfetch
 from google.appengine.runtime import apiproxy_errors
 from google.appengine.api.app_identity import get_application_id
+from google.appengine.api import memcache
+
+import extractlinks
+from extractlinks import LinkExtractor
 
 SUPERFEEDR_LOGIN = ""
 SUPERFEEDR_PASSWORD = ""
@@ -48,12 +52,50 @@ class Subscription(db.Model):
   created_at = db.DateTimeProperty(required=True, auto_now_add=True)
 
 ##
+# The subscribe page. Useful for those who want to subscribe easily via a web page
+class SubscribePage(webapp.RequestHandler):
+
+  def get(self):
+    feeds = []
+    if self.request.get("resource"):
+      feeds = memcache.get(self.request.get("resource"))
+      if feeds is not None:
+        # good
+        logging.debug("Memcache hit.")
+      else:
+        logging.debug("Memcache miss.")
+        try:
+          result = urlfetch.fetch(url=self.request.get("resource"), deadline=10)
+          parser = LinkExtractor()
+          parser.set_base_url(self.request.get("resource"))
+          parser.feed(result.content)
+          if parser.links:
+            feeds = parser.links
+          else:
+            feeds = []
+
+          if not feeds:
+              # Let's check if by any chance this is actually not a feed?
+              data = feedparser.parse(result.content)
+              mimeType = "application/atom+xml"
+              href = self.request.get("resource")
+              if re.match("atom", data.version):
+                  mimeType = "application/atom+xml"
+              feeds = [{'title': data.feed.title, 'rel': 'self', 'type': mimeType, 'href': href}]
+
+        except:
+          feeds = []
+
+        if not memcache.set(self.request.get("resource"), feeds, 86400):
+          logging.error("Memcache set failed.")
+        else:
+          logging.debug("Memcache set.")
+
+    self.response.out.write(template.render(os.path.join(os.path.dirname(__file__), 'templates', "subscribe.html"), {'appname': appname, 'feeds': feeds}))
+
+##
 # The web app interface
 class MainPage(webapp.RequestHandler):
-
-  def Render(self, template_file, template_values = {'appname': appname}):
-     path = os.path.join(os.path.dirname(__file__), 'templates', template_file)
-     self.response.out.write(template.render(path, template_values))
 
   def get(self):
     self.redirect('http://blog.superfeedr.com/notifixlight/')
@@ -82,14 +124,17 @@ class HubbubSubscriber(webapp.RequestHandler):
     else:
       body = self.request.body.decode('utf-8')
       data = feedparser.parse(self.request.body)
-      # logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
-      feed_title = data.feed.title
+      logging.info('Found %d entries in %s', len(data.entries), subscription.feed)
+      try:
+        feed_title = data.feed.title
+      except AttributeError:
+        feed_title = ''
       for entry in data.entries:
         link = entry.get('link', '')
         title = entry.get('title', '')
-        # logging.info('Found entry with title = "%s", '
-        #            'link = "%s"',
-        #            title, link)
+        logging.info('Found entry with title = "%s", '
+                   'link = "%s"',
+                   title, link)
         user_address = subscription.jid
         msg = "'" + feed_title + "' : " + title + "\n" + link
         status_code = xmpp.send_message(user_address, msg)
@@ -120,7 +165,7 @@ class HubbubSubscriber(webapp.RequestHandler):
         self.response.out.write(self.request.get('hub.challenge'))
         self.response.set_status(200)
       elif(self.request.get("hub.mode") == "unsubscribe"):
-        msg =  "You're not anybmore subscribed to " + subscription.feed
+        msg =  "You're not anymore subscribed to " + subscription.feed
         xmpp.send_message(user_address, msg)
         self.response.out.write(self.request.get('hub.challenge'))
         self.response.set_status(200)
@@ -224,7 +269,12 @@ class XMPPHandler(xmpp_handlers.CommandHandler):
     message = xmpp.Message(self.request.POST)
     message.reply("Echooooo (when you're done playing, type /help) > " + message.body)
 
-application = webapp.WSGIApplication([('/_ah/xmpp/message/chat/', XMPPHandler), ('/', MainPage), ('/hubbub/(.*)', HubbubSubscriber)],debug=True)
+application = webapp.WSGIApplication([
+                                     ('/_ah/xmpp/message/chat/', XMPPHandler),
+                                     ('/', MainPage),
+                                     ('/subscribe', SubscribePage),
+                                     ('/hubbub/(.*)', HubbubSubscriber)
+                                     ], debug=True)
 
 def main():
   run_wsgi_app(application)

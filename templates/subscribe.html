@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Notifixlite</title>
+<style type="text/css">
+  body {
+      font-family:Helvetica,"Times New Roman",Georgia,Serif;
+      color: #CFB084;
+      background-color: #2D687A;
+      margin:0px;
+      padding:0px;
+  }
+  h1 {
+      font-size:5.0em;
+  }
+  a {
+      color: #4D2A0B;
+  }
+  .bottom {
+      color:#A24732;
+      font-size:0.8em;
+      background-color: #54A1AB;
+      position:absolute;
+      bottom:0;
+      width: 100%;
+      margin:0px;
+      padding:10px 0px 10px 0px;
+      text-align:right;
+  }
+  img {
+      vertical-align:middle;
+  }
+  </style>
+</head>
+<body>
+  {% for feed in feeds %}
+    <h2><a href='xmpp:notifixlite@appspot.com?message;body=/subscribe%20{{feed.href}}'>subscribe to {{feed.title}}</a></h2>
+  {% endfor %}
+    <p class="bottom">Powered by <a href="http://superfeedr.com">Superfeedr</a> on <a href="http://http://code.google.com/appengine/">Google App Engine</a> - Take that bad <a href="http://github.com/superfeedr/notifixlight">code</a> and make it better.</p>
+  <iframe style="display:none;" src='http://www.subtome.com/register.html?name={{appname}}&url=http://{{appname}}.appspot.com/subscribe?resource=%7Burl%7D' />
+</body>
+</html>
