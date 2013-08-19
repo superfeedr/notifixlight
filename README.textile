@@ -1,7 +1,6 @@
 h2. notifixlite
 
-*WARNING* Google App Engine will not support XMPP anymore soon. As a consequence, we're not maintaining this code anymore.
-However, we have released a much better (and more complete!) bot called [Notifix](https://github.com/julien51/notifix). Check it out!
+*WARNING* Google App Engine will not support XMPP anymore soon. As a consequence, we're not maintaining this code anymore. However, we have released a much better (and more complete!) bot called "Notifix":https://github.com/julien51/notifix. Check it out!
 
 h3. What is it?
 
