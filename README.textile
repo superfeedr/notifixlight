@@ -1,34 +1,9 @@
 h2. notifixlite
 
+*WARNING* Google App Engine will not support XMPP anymore soon. As a consequence, we're not maintaining this code anymore.
+However, we have released a much better (and more complete!) bot called [Notifix](https://github.com/julien51/notifix). Check it out!
+
 h3. What is it?
 
 "notifixlite":http://notifixlite.appspot.com/ is a simple RSS to IM (Jabber, XMPP, Gtalk) bot.
 
-h3. Usage 
-
-Just add "notifixlite@appspot.com":xmpp:notifixlite@appspot.com to your contact on gtalk (using any "XMPP client":http://xmpp.org/xmpp-software/clients/). and get started by saying <code>/help</code>.
-
-h3. Run your own
-
-We graciously run an instance that anyone can use at "notifixlite":http://notifixlite.appspot.com/, and it sometimes runs out of credits. You can easily avoid this by running this under your very own Google App Account. To do so :
-
-# Signup or log in to "Google App Engine":https://appengine.google.com/
-# Create a new application, name it in a non-guessable way if you want to be the only one using it :)
-# Checkout the code : <code>git clone git://github.com/superfeedr/notifixlight.git</code>
-# Update your application name's in app.yaml, line 1 (replace <code>notifixlite</code>) with whatever you chose at step 2.
-# Open a superfeedr "subscriber account":http://superfeedr.com/subscriber.
-# Update <code>main.py</code> and add your superfeedr credentials at line 16 and 17; and change the call back on line 24 with your application's URL."
-# "Deploy your instance":http://code.google.com/appengine/docs/python/gettingstarted/uploading.html of Notifixlite 
-# Enjoy!
-
-ps. Earn extra points, modify template/index.html so the instructions match your application's name.
-
-h3. TODO
-
-* Allow for "private" instances... limited with a password
-* Google Reader import
-* Web interface to consult history
-* Add a <code>/track</code> command that directly uses Superfeedr's "track feeds":http://superfeedr.com/documentation#track.
-* Allow to get started from the web app, rather than from an XMPP client.
-* Integrate with Instapaper : add <code>/later</code> for the last notification
-* Allow for <code>/last</code> to get the last X stories.
